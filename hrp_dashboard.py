@@ -80,6 +80,39 @@ def risk_contributions_calc(w, cov_matrix):
     rc_abs = w * (cov_matrix @ w)
     return (rc_abs / portfolio_var) * 100 if portfolio_var else np.zeros_like(w)
 
+@st.cache_data
+def enb_mlt(weights, cov_matrix):
+    """
+    Effective Number of Bets via Minimal Linear Torsion (Meucci, 2009).
+
+    Steps
+    -----
+    1.  Σ = V Λ Vᵀ             (eigen-decomposition of the asset covariance)
+    2.  Σ½ = V √Λ Vᵀ           (matrix square-root)
+    3.  g  = Σ½ · w            (factor exposures of the portfolio)
+    4.  vᵢ = gᵢ²               (variance each uncorrelated factor contributes)
+    5.  pᵢ = vᵢ / Σ vᵢ         (normalised contributions, Σ pᵢ = 1)
+    6.  ENB = exp( −Σ pᵢ ln pᵢ )   (Shannon-entropy effective dimensionality)
+    """
+    if cov_matrix is None or weights is None:                       # basic guards
+        return 0.0
+    w = np.asarray(weights, dtype=float).flatten()
+    Σ = np.asarray(cov_matrix, dtype=float)
+    if w.size == 0 or Σ.size == 0 or np.allclose(w, 0):
+        return 0.0
+
+    #  Eigen-decomposition (guaranteed SPD after Ledoit-Wolf shrinkage above)
+    λ, V = np.linalg.eigh(Σ)
+    λ = np.clip(λ, 1e-12, None)                                     # numeric guard
+    Σ_half = (V * np.sqrt(λ)) @ V.T                                 # Σ^{1/2}
+
+    g = Σ_half @ w                                                  # factor loads
+    v = g ** 2                                                      # factor variances
+    if v.sum() == 0:
+        return 0.0
+    p = v / v.sum()                                                 # normalise
+    return np.exp(-np.sum(p * np.log(p)))                           # Shannon ENB
+
 
 @st.cache_data # Not caching this
 def enb(rc_vector):
@@ -438,8 +471,8 @@ if st.sidebar.button("Run Analysis"):
             RC_HRP_vals = risk_contributions_calc(w_hrp_vals, Sigma_m_vals)
             RC_usr_vals = risk_contributions_calc(w_user_vals, Sigma_m_vals)
             
-            ENB_HRP = enb(RC_HRP_vals)
-            ENB_usr = enb(RC_usr_vals)
+            ENB_HRP = enb_mlt(w_hrp_vals, Sigma_m_vals)
+            ENB_usr = enb_mlt(w_user_vals, Sigma_m_vals)
 
             metrics_data = {
                 "Metric": ["Diversification Ratio", "Effective # of Bets"],
