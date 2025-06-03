@@ -1,4 +1,4 @@
-import streamlit as st
+topimport streamlit as st
 import pandas as pd
 import numpy as np
 import yfinance as yf
@@ -291,8 +291,8 @@ elif input_method == "Upload CSV":
 
 # Analysis Parameters
 st.sidebar.subheader("Analysis Parameters")
-top_n_rc = st.sidebar.number_input("Top N Risk Contributors", min_value=1, max_value=50, value=20, step=1, key="top_n_rc_input")
-max_clusters_rc_detail_input = st.sidebar.number_input("Max Clusters (Detailed Analysis)", min_value=2, max_value=50, value=30, step=1, key="max_clusters_input")
+top_n_rc = st.sidebar.number_input("Top N Risk Contributors", min_value=1, max_value=100, value=50, step=1, key="top_n_rc_input")
+max_clusters_rc_detail_input = st.sidebar.number_input("Max Clusters (Detailed Analysis)", min_value=2, max_value=100, value=30, step=1, key="max_clusters_input")
 
 # --- Main Application ---
 st.title("Risk Parity Dashboard")
