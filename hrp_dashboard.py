@@ -693,16 +693,7 @@ if st.sidebar.button("Run Analysis"):
                                         label='KDE (Kernel Density)')
                     except:
                         pass
-                    
-                    # Student's t-distribution (better for fat tails)
-                    try:
-                        t_params_user = t.fit(user_returns)
-                        t_pdf_user = t.pdf(x_user, *t_params_user)
-                        ax_user_hist.plot(x_user, t_pdf_user, 'b-', linewidth=2, 
-                                        label=f'Student-t (df={t_params_user[0]:.2f})')
-                    except:
-                        pass
-                    
+
                     # Add VaR line
                     ax_user_hist.axvline(user_performance['var_99'], color='blue', linestyle='--', 
                                        label=f"99% VaR: {user_performance['var_99']:.2%}")
