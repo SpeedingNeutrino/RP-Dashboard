@@ -169,7 +169,7 @@ st.sidebar.header("User Portfolio & Analysis Settings")
 
 # Date Range
 st.sidebar.subheader("Date Range for Price Data")
-default_start_date = pd.to_datetime("2020-01-01")
+default_start_date = pd.to_datetime("2021-01-01")
 default_end_date = pd.to_datetime("today")
 start_date = st.sidebar.date_input("Start Date", value=default_start_date, max_value=default_end_date - pd.Timedelta(days=1))
 end_date = st.sidebar.date_input("End Date", value=default_end_date, min_value=start_date + pd.Timedelta(days=1))
