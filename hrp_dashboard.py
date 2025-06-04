@@ -436,7 +436,7 @@ if st.sidebar.button("Run"):
             weights_comparison_df = pd.concat([w_hrp, w_user], axis=1).fillna(0)
             weights_comparison_df.columns = ["HRP Weights", "User Weights"] # Ensure column names
             weights_comparison_df["Difference (User - HRP)"] = weights_comparison_df["User Weights"] - weights_comparison_df["HRP Weights"]
-
+            
             with col2_den:
                 st.write("HRP vs User Weights:")
                 st.dataframe(weights_comparison_df.style.format("{:.2%}"))
@@ -453,7 +453,59 @@ if st.sidebar.button("Run"):
             plt.xticks(rotation=90)
             plt.tight_layout()
             st.pyplot(fig_dev)
-
+            
+            # Correlation Matrix ordered by dendrogram
+            st.subheader("Asset Correlation Matrix")
+            
+            # Compute correlation matrix from covariance matrix
+            std_dev = np.sqrt(np.diag(Sigma_df_aligned.values))
+            corr_matrix = Sigma_df_aligned.values / std_dev[:, None] / std_dev[None, :]
+            corr_df = pd.DataFrame(corr_matrix, index=valid_tickers_from_prices, columns=valid_tickers_from_prices)
+            
+            # Reorder by dendrogram (HRP ordering)
+            corr_df_ordered = corr_df.reindex(index=ordered_tickers_hrp, columns=ordered_tickers_hrp)
+            
+            # Calculate figure size based on number of assets (minimum 8x8, scale with asset count)
+            n_assets = len(ordered_tickers_hrp)
+            fig_size = max(8, min(16, n_assets * 0.4))
+            
+            fig_corr, ax_corr = plt.subplots(figsize=(fig_size, fig_size))
+            
+            # Create heatmap
+            im = ax_corr.imshow(corr_df_ordered.values, cmap='RdBu_r', vmin=-1, vmax=1, aspect='equal')
+            
+            # Set ticks and labels
+            ax_corr.set_xticks(range(n_assets))
+            ax_corr.set_yticks(range(n_assets))
+            
+            # Calculate font size based on number of assets
+            if n_assets <= 10:
+                font_size = 10
+            elif n_assets <= 20:
+                font_size = 8
+            elif n_assets <= 30:
+                font_size = 6
+            else:
+                font_size = max(4, 120 // n_assets)  # Minimum font size of 4
+            
+            ax_corr.set_xticklabels(ordered_tickers_hrp, rotation=90, fontsize=font_size)
+            ax_corr.set_yticklabels(ordered_tickers_hrp, fontsize=font_size)
+            
+            # Add colorbar
+            cbar = plt.colorbar(im, ax=ax_corr, shrink=0.8)
+            cbar.set_label('Correlation', rotation=270, labelpad=15)
+            
+            # Add correlation values as text (only for smaller matrices to avoid clutter)
+            if n_assets <= 15:
+                for i in range(n_assets):
+                    for j in range(n_assets):
+                        text_color = 'white' if abs(corr_df_ordered.iloc[i, j]) > 0.5 else 'black'
+                        ax_corr.text(j, i, f'{corr_df_ordered.iloc[i, j]:.2f}', 
+                                   ha='center', va='center', color=text_color, fontsize=max(6, font_size-2))
+            
+            ax_corr.set_title(f'Correlation Matrix (Dendrogram Ordered)\n{n_assets} Assets', fontsize=min(14, font_size + 4))
+            plt.tight_layout()
+            st.pyplot(fig_corr)
 
             st.header("Risk & Diversification")
             # 7. Diversification-loss Metrics
