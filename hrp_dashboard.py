@@ -489,7 +489,7 @@ if st.sidebar.button("Run"):
             elif n_assets <= 30:
                 font_size = 16
             else:
-                font_size = 16
+                font_size = 12
             
             ax_corr.set_xticklabels(ordered_tickers_hrp, rotation=90, fontsize=font_size)
             ax_corr.set_yticklabels(ordered_tickers_hrp, fontsize=font_size)
