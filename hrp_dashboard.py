@@ -808,7 +808,7 @@ if st.sidebar.button("Run"):
                 
                 with col1_roll:
                     # Rolling Sharpe ratio (30-day window)
-                    window = min(30, len(returns) // 4)  # Adaptive window size
+                    window = min(60, len(returns) // 4)  # Adaptive window size
                     if window >= 5:  # Only calculate if we have enough data
                         hrp_rolling_sharpe = (hrp_performance['portfolio_returns'].rolling(window).mean() * np.sqrt(252)) / (hrp_performance['portfolio_returns'].rolling(window).std() * np.sqrt(252))
                         user_rolling_sharpe = (user_performance['portfolio_returns'].rolling(window).mean() * np.sqrt(252)) / (user_performance['portfolio_returns'].rolling(window).std() * np.sqrt(252))
