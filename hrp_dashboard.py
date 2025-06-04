@@ -408,6 +408,8 @@ if st.sidebar.button("Run"):
                 Sigma = returns.cov() # Sample covariance
             
             Sigma = pd.DataFrame(Sigma, index=valid_tickers_from_prices, columns=valid_tickers_from_prices)
+            Sigma_df_aligned = Sigma.reindex(index=valid_tickers_from_prices, columns=valid_tickers_from_prices).fillna(0)
+            
 
 
             # 2. HRP Portfolio
@@ -456,8 +458,6 @@ if st.sidebar.button("Run"):
             
             # Correlation Matrix ordered by dendrogram
             st.subheader("Asset Correlation Matrix")
-            
-            Sigma_df_aligned = Sigma.reindex(index=valid_tickers_from_prices, columns=valid_tickers_from_prices).fillna(0)
             
 
             # Compute correlation matrix from covariance matrix
