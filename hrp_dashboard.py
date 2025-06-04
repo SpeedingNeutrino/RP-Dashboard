@@ -485,9 +485,9 @@ if st.sidebar.button("Run"):
             if n_assets <= 10:
                 font_size = 10
             elif n_assets <= 20:
-                font_size = 8
+                font_size = 12
             elif n_assets <= 30:
-                font_size = 8
+                font_size = 12
             else:
                 font_size = max(4, 120 // n_assets)  # Minimum font size of 4
             
