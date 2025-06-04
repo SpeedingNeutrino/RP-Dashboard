@@ -198,7 +198,7 @@ def calculate_portfolio_performance(returns, weights, name="Portfolio"):
     }
 
 # --- Sidebar for Inputs ---
-st.sidebar.header("User Portfolio & Analysis Settings")
+st.sidebar.header("User Portfolio & Settings")
 
 # Date Range
 st.sidebar.subheader("Date Range for Price Data")
@@ -290,14 +290,14 @@ elif input_method == "Upload CSV":
 
 
 # Analysis Parameters
-st.sidebar.subheader("Analysis Parameters")
+st.sidebar.subheader("Parameters")
 top_n_rc = st.sidebar.number_input("Top N Risk Contributors", min_value=1, max_value=100, value=50, step=1, key="top_n_rc_input")
-max_clusters_rc_detail_input = st.sidebar.number_input("Max Clusters (Detailed Analysis)", min_value=2, max_value=100, value=30, step=1, key="max_clusters_input")
+max_clusters_rc_detail_input = st.sidebar.number_input("Max Clusters", min_value=2, max_value=100, value=30, step=1, key="max_clusters_input")
 
 # --- Main Application ---
 st.title("Risk Parity Dashboard")
 
-if st.sidebar.button("Run Analysis"):
+if st.sidebar.button("Run"):
     # --- Input Validation and Preparation ---
     if not user_tickers_list:
         st.error("No tickers provided. Please enter tickers manually or upload a CSV file with a 'Ticker' column.") # Corrected 'Tickers' to 'Ticker'
@@ -362,7 +362,7 @@ if st.sidebar.button("Run Analysis"):
 
     st.info(f"Preparing to analyze with tickers: {user_tickers_list}, Start: {start_date}, End: {end_date}") # Debug info
 
-    with st.spinner("Fetching data and performing analysis..."):
+    with st.spinner("Fetching data"):
         try:
             prices = download_prices(user_tickers_list, start_date, end_date)
             if prices.empty or prices.shape[0] < 2:
@@ -456,7 +456,7 @@ if st.sidebar.button("Run Analysis"):
             st.pyplot(fig_dev)
 
 
-            st.header("Risk & Diversification Analysis")
+            st.header("Risk & Diversification")
             # 7. Diversification-loss Metrics
             st.subheader("Portfolio Diversification Metrics")
             Sigma_df_aligned = Sigma.reindex(index=valid_tickers_from_prices, columns=valid_tickers_from_prices).fillna(0)
@@ -510,7 +510,7 @@ if st.sidebar.button("Run Analysis"):
             st.pyplot(fig_top_rc)
 
             # 10. Detailed Cluster Analysis
-            st.subheader(f"Detailed Cluster Analysis (n={max_clusters_rc_detail_input} clusters)")
+            st.subheader(f"Cluster Analysis ({max_clusters_rc_detail_input} clusters)")
             if hrp.clusters is not None: # hrp.clusters is the linkage matrix
                 cl_labels_detail = fcluster(hrp.clusters, t=max_clusters_rc_detail_input, criterion="maxclust")
                 # Use ordered_tickers_hrp which is derived from clean_weights()
@@ -562,11 +562,11 @@ if st.sidebar.button("Run Analysis"):
                 else:
                     st.write("No cluster details to display.")
             else:
-                st.warning("HRP clustering data (hrp.clusters) not available for detailed analysis.")
+                st.warning("HRP clustering data (hrp.clusters) not available for analysis.")
 
             # 11. Cumulative Returns Analysis
-            st.header("Portfolio Performance Analysis")
-            st.subheader("Cumulative Returns Comparison")
+            st.header("Portfolio Performance")
+            st.subheader("Cumulative Returns")
             
             # Calculate performance for both portfolios
             hrp_performance = calculate_portfolio_performance(returns, w_hrp, "HRP Portfolio")
@@ -661,7 +661,7 @@ if st.sidebar.button("Run Analysis"):
                 st.table(stats_df)
                 
                 # Returns distribution analysis
-                st.subheader("Returns Distribution Analysis")
+                st.subheader("Returns Distribution")
                 
                 col1_hist, col2_hist = st.columns(2)
                 
@@ -802,4 +802,4 @@ if st.sidebar.button("Run Analysis"):
             # st.exception(e) # For more detailed traceback during development
 
 else:
-    st.info("Configure your portfolio settings in the sidebar and click 'Run Analysis'.")
+    st.info("Configure your portfolio settings in the sidebar and click 'Run'.")
