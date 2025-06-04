@@ -443,7 +443,7 @@ if st.sidebar.button("Run"):
             
             # Bar chart for weight deviations
             # Order by descending User Weights
-            weights_for_plot = weights_comparison_df.sort_values(by="User Weights", ascending=False)
+            weights_for_plot = weights_comparison_df.sort_values(by="HRP Weights", ascending=False)
 
             fig_dev, ax_dev = plt.subplots(figsize=(12, 7))
             weights_for_plot[["HRP Weights", "User Weights"]].plot(kind='bar', ax=ax_dev, width=0.8)
