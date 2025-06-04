@@ -443,33 +443,24 @@ if st.sidebar.button("Run"):
                 st.write("HRP vs User Weights:")
                 st.dataframe(weights_comparison_df.style.format("{:.2%}"))
             
-            # Bar chart for weight deviations
-            # Order by descending User Weights
-            weights_for_plot = weights_comparison_df.sort_values(by="HRP Weights", ascending=False)
-
-            fig_dev, ax_dev = plt.subplots(figsize=(12, 7))
-            weights_for_plot[["HRP Weights", "User Weights"]].plot(kind='bar', ax=ax_dev, width=0.8)
-            ax_dev.set_title("HRP vs User Weights by Asset")
-            ax_dev.set_ylabel("Weight")
-            ax_dev.set_xlabel("Assets")
-            plt.xticks(rotation=90)
-            plt.tight_layout()
-            st.pyplot(fig_dev)
+            # Correlation Matrix ordered by dendrogram (place here, above bar chart)
+            st.subheader("Asset Correlation Matrix (Dendrogram Ordered)")
             
-            # Correlation Matrix ordered by dendrogram
-            st.subheader("Asset Correlation Matrix")
+            # Get proper dendrogram ordering using leaves_list
+            dendrogram_order = leaves_list(hrp.clusters)
+            # Map dendrogram leaf indices to actual ticker names
+            dendrogram_ordered_tickers = [valid_tickers_from_prices[i] for i in dendrogram_order]
             
-
             # Compute correlation matrix from covariance matrix
             std_dev = np.sqrt(np.diag(Sigma_df_aligned.values))
             corr_matrix = Sigma_df_aligned.values / std_dev[:, None] / std_dev[None, :]
             corr_df = pd.DataFrame(corr_matrix, index=valid_tickers_from_prices, columns=valid_tickers_from_prices)
             
-            # Reorder by dendrogram (HRP ordering)
-            corr_df_ordered = corr_df.reindex(index=ordered_tickers_hrp, columns=ordered_tickers_hrp)
+            # Reorder by dendrogram (proper HRP ordering using leaves_list)
+            corr_df_ordered = corr_df.reindex(index=dendrogram_ordered_tickers, columns=dendrogram_ordered_tickers)
             
             # Calculate figure size based on number of assets (minimum 8x8, scale with asset count)
-            n_assets = len(ordered_tickers_hrp)
+            n_assets = len(dendrogram_ordered_tickers)
             fig_size = max(8, min(16, n_assets * 0.4))
             
             fig_corr, ax_corr = plt.subplots(figsize=(fig_size, fig_size))
@@ -491,8 +482,8 @@ if st.sidebar.button("Run"):
             else:
                 font_size = 12
             
-            ax_corr.set_xticklabels(ordered_tickers_hrp, rotation=90, fontsize=font_size)
-            ax_corr.set_yticklabels(ordered_tickers_hrp, fontsize=font_size)
+            ax_corr.set_xticklabels(dendrogram_ordered_tickers, rotation=90, fontsize=font_size)
+            ax_corr.set_yticklabels(dendrogram_ordered_tickers, fontsize=font_size)
             
             # Add colorbar
             cbar = plt.colorbar(im, ax=ax_corr, shrink=0.8)
@@ -509,6 +500,19 @@ if st.sidebar.button("Run"):
             ax_corr.set_title(f'Correlation Matrix (Dendrogram Ordered)\n{n_assets} Assets', fontsize=min(14, font_size + 4))
             plt.tight_layout()
             st.pyplot(fig_corr)
+            
+            # Bar chart for weight deviations
+            # Order by descending HRP Weights  
+            weights_for_plot = weights_comparison_df.sort_values(by="HRP Weights", ascending=False)
+
+            fig_dev, ax_dev = plt.subplots(figsize=(12, 7))
+            weights_for_plot[["HRP Weights", "User Weights"]].plot(kind='bar', ax=ax_dev, width=0.8)
+            ax_dev.set_title("HRP vs User Weights by Asset")
+            ax_dev.set_ylabel("Weight")
+            ax_dev.set_xlabel("Assets")
+            plt.xticks(rotation=90)
+            plt.tight_layout()
+            st.pyplot(fig_dev)
 
             st.header("Risk & Diversification")
             # 7. Diversification-loss Metrics
@@ -566,17 +570,17 @@ if st.sidebar.button("Run"):
             st.subheader(f"Cluster Analysis ({max_clusters_rc_detail_input} clusters)")
             if hrp.clusters is not None: # hrp.clusters is the linkage matrix
                 cl_labels_detail = fcluster(hrp.clusters, t=max_clusters_rc_detail_input, criterion="maxclust")
-                # Use ordered_tickers_hrp which is derived from clean_weights()
-                cl_ser_detail = pd.Series(cl_labels_detail, index=ordered_tickers_hrp, name="Cluster")
+                # Use dendrogram_ordered_tickers which follows the proper dendrogram ordering
+                cl_ser_detail = pd.Series(cl_labels_detail, index=dendrogram_ordered_tickers, name="Cluster")
 
                 st.write("Tickers per Cluster:")
-                # Align weights to ordered_tickers_hrp for this section
-                w_hrp_aligned_detail = w_hrp.reindex(ordered_tickers_hrp).fillna(0)
-                w_user_aligned_detail = w_user.reindex(ordered_tickers_hrp).fillna(0)
+                # Align weights to dendrogram_ordered_tickers for this section
+                w_hrp_aligned_detail = w_hrp.reindex(dendrogram_ordered_tickers).fillna(0)
+                w_user_aligned_detail = w_user.reindex(dendrogram_ordered_tickers).fillna(0)
 
                 # Correctly group tickers by cluster ID
                 cluster_groups_detail = (
-                    pd.DataFrame({'ticker': ordered_tickers_hrp, 'cluster_id': cl_labels_detail})
+                    pd.DataFrame({'ticker': dendrogram_ordered_tickers, 'cluster_id': cl_labels_detail})
                     .groupby('cluster_id')['ticker']
                     .apply(list)
                     .sort_index()
