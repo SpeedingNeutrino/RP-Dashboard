@@ -483,13 +483,13 @@ if st.sidebar.button("Run"):
             
             # Calculate font size based on number of assets
             if n_assets <= 10:
-                font_size = 10
+                font_size = 16
             elif n_assets <= 20:
-                font_size = 12
+                font_size = 16
             elif n_assets <= 30:
-                font_size = 12
+                font_size = 16
             else:
-                font_size = max(4, 120 // n_assets)  # Minimum font size of 4
+                font_size = 16
             
             ax_corr.set_xticklabels(ordered_tickers_hrp, rotation=90, fontsize=font_size)
             ax_corr.set_yticklabels(ordered_tickers_hrp, fontsize=font_size)
