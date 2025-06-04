@@ -457,6 +457,9 @@ if st.sidebar.button("Run"):
             # Correlation Matrix ordered by dendrogram
             st.subheader("Asset Correlation Matrix")
             
+            Sigma_df_aligned = Sigma.reindex(index=valid_tickers_from_prices, columns=valid_tickers_from_prices).fillna(0)
+            
+
             # Compute correlation matrix from covariance matrix
             std_dev = np.sqrt(np.diag(Sigma_df_aligned.values))
             corr_matrix = Sigma_df_aligned.values / std_dev[:, None] / std_dev[None, :]
@@ -510,7 +513,6 @@ if st.sidebar.button("Run"):
             st.header("Risk & Diversification")
             # 7. Diversification-loss Metrics
             st.subheader("Portfolio Diversification Metrics")
-            Sigma_df_aligned = Sigma.reindex(index=valid_tickers_from_prices, columns=valid_tickers_from_prices).fillna(0)
             
             w_hrp_vals = w_hrp.reindex(valid_tickers_from_prices).fillna(0).values
             w_user_vals = w_user.reindex(valid_tickers_from_prices).fillna(0).values
