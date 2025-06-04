@@ -444,7 +444,7 @@ if st.sidebar.button("Run"):
                 st.dataframe(weights_comparison_df.style.format("{:.2%}"))
             
             # Correlation Matrix ordered by dendrogram (place here, above bar chart)
-            st.subheader("Asset Correlation Matrix (Dendrogram Ordered)")
+            st.subheader("Asset Correlation Matrix")
             
             # Get proper dendrogram ordering using leaves_list
             dendrogram_order = leaves_list(hrp.clusters)
