@@ -436,19 +436,18 @@ if st.sidebar.button("Run"):
             weights_comparison_df = pd.concat([w_hrp, w_user], axis=1).fillna(0)
             weights_comparison_df.columns = ["HRP Weights", "User Weights"] # Ensure column names
             weights_comparison_df["Difference (User - HRP)"] = weights_comparison_df["User Weights"] - weights_comparison_df["HRP Weights"]
-            
+
             with col2_den:
                 st.write("HRP vs User Weights:")
                 st.dataframe(weights_comparison_df.style.format("{:.2%}"))
             
             # Bar chart for weight deviations
-            # Use the HRP-ordered tickers derived from clean_weights()
-            plot_order = ordered_tickers_hrp
-            weights_for_plot = weights_comparison_df.reindex(plot_order).fillna(0)
+            # Order by descending User Weights
+            weights_for_plot = weights_comparison_df.sort_values(by="User Weights", ascending=False)
 
             fig_dev, ax_dev = plt.subplots(figsize=(12, 7))
             weights_for_plot[["HRP Weights", "User Weights"]].plot(kind='bar', ax=ax_dev, width=0.8)
-            ax_dev.set_title("HRP vs User Weights by Asset (Ordered by Dendrogram/Index)")
+            ax_dev.set_title("HRP vs User Weights by Asset")
             ax_dev.set_ylabel("Weight")
             ax_dev.set_xlabel("Assets")
             plt.xticks(rotation=90)
